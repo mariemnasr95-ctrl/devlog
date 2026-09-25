@@ -1,0 +1,138 @@
+.login-page,
+.signup-page {
+	align-items: center;
+	background:
+		radial-gradient(circle at 50% 0%, rgba(68, 78, 197, 0.24), transparent 38%),
+		#050c16;
+	box-sizing: border-box;
+	color: #d9e5f4;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 100vh;
+	overflow: hidden;
+	padding: 32px 16px;
+	position: relative;
+}
+
+.login-page::before,
+.signup-page::before {
+	border: 1px solid rgba(80, 112, 164, 0.18);
+	border-radius: 50%;
+	content: '';
+	height: 520px;
+	position: absolute;
+	right: -180px;
+	top: -220px;
+	width: 520px;
+}
+
+.login-page > h1 {
+	color: #eef4ff;
+	font-size: 16px;
+	letter-spacing: 0.08em;
+	margin: 0 0 18px;
+	position: relative;
+}
+
+.login-container,
+.signup-container {
+	background: rgba(13, 26, 44, 0.94);
+	border: 1px solid #1d3855;
+	border-radius: 8px;
+	box-shadow: 0 22px 60px rgba(0, 0, 0, 0.38);
+	max-width: 390px;
+	padding: 28px;
+	position: relative;
+	width: 100%;
+}
+
+.login-container h2,
+.signup-container h2 {
+	color: #edf3ff;
+	font-size: 22px;
+	margin: 0 0 24px;
+}
+
+.form-field {
+	margin-bottom: 18px;
+}
+
+.form-field label {
+	color: #9aabc0;
+	display: block;
+	font-size: 12px;
+	margin-bottom: 7px;
+}
+
+.input-with-icon {
+	align-items: center;
+	background: #091525;
+	border: 1px solid #213b59;
+	border-radius: 5px;
+	display: flex;
+	gap: 9px;
+	padding: 0 11px;
+	transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.input-with-icon:focus-within {
+	border-color: #647dff;
+	box-shadow: 0 0 0 3px rgba(100, 125, 255, 0.14);
+}
+
+.input-icon {
+	color: #7187a6;
+	flex: 0 0 auto;
+}
+
+.input-with-icon input {
+	background: transparent;
+	border: 0;
+	color: #edf3ff;
+	font: inherit;
+	min-width: 0;
+	outline: 0;
+	padding: 12px 0;
+	width: 100%;
+}
+
+.login-container p {
+	color: #7f92ab;
+	font-size: 12px;
+	margin: 4px 0 20px;
+}
+
+.login-container p a,
+.signup-container a {
+	color: #8297ff;
+}
+
+.login-container form > button,
+.signup-container form > button {
+	align-items: center;
+	background: #526cef;
+	border: 0;
+	border-radius: 5px;
+	color: #fff;
+	cursor: pointer;
+	display: inline-flex;
+	font: inherit;
+	font-size: 13px;
+	gap: 8px;
+	justify-content: center;
+	padding: 11px 16px;
+	width: 100%;
+}
+
+.login-container form > button:hover,
+.signup-container form > button:hover {
+	background: #657dff;
+}
+
+@media (max-width: 420px) {
+	.login-container,
+	.signup-container {
+		padding: 22px 18px;
+	}
+}
