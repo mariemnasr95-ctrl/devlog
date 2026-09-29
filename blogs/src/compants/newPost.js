@@ -3,6 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { publishPost } from './postStore';
 
+async function createBlog(blogData) {
+    const token = localStorage.getItem('token');
+    // The create-blog API requires the JWT returned by login.
+    const response = await fetch('http://localhost:5000/api/blogs', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(blogData),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+        throw new Error(result.message || 'Unable to publish the post.');
+    }
+    return result;
+}
+
 function NewPost() {
     const navigate = useNavigate();
     const [title, setTitle] = useState('');
@@ -12,19 +30,25 @@ function NewPost() {
     const [tags, setTags] = useState('');
     const [status, setStatus] = useState('');
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
         const words = content.trim().split(/\s+/).filter(Boolean).length;
-        publishPost({
-            title: title.trim(),
-            description: excerpt.trim() || content.trim().slice(0, 120),
-            category,
-            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            readTime: `${Math.max(1, Math.ceil(words / 200))} min read`,
-            art: 'published-art',
-            glyph: category === 'Java' ? 'J' : category === 'C' ? 'C' : '>_',
-        });
-        navigate('/');
+        setStatus('');
+        try {
+            await createBlog({ title: title.trim(), content: content.trim() });
+            publishPost({
+                title: title.trim(),
+                description: excerpt.trim() || content.trim().slice(0, 120),
+                category,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                readTime: `${Math.max(1, Math.ceil(words / 200))} min read`,
+                art: 'published-art',
+                glyph: category === 'Java' ? 'J' : category === 'C' ? 'C' : '>_',
+            });
+            navigate('/');
+        } catch (error) {
+            setStatus(error.message || 'Unable to publish the post.');
+        }
     }
 
     function handleSaveDraft() {

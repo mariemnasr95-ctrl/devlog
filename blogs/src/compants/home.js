@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowUpRight, Clock3, Code2, Moon, Search, Tag, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import About from './about';
@@ -33,7 +33,44 @@ function Home() {
     const [showAbout, setShowAbout] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [publishedPosts] = useState(() => getPublishedPosts());
-    const visiblePosts = [...publishedPosts, ...posts];
+    const [serverBlogs, setServerBlogs] = useState([]);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        // Load published blogs from the backend for the home feed.
+        async function loadBlogs() {
+            try {
+                const response = await fetch('http://localhost:5000/api/blogs', { signal: controller.signal });
+                if (!response.ok) throw new Error('Unable to load posts.');
+                const blogs = await response.json();
+                setServerBlogs(Array.isArray(blogs) ? blogs : []);
+            } catch {
+                if (!controller.signal.aborted) setServerBlogs([]);
+            }
+        }
+
+        loadBlogs();
+        return () => controller.abort();
+    }, []);
+
+    const serverPosts = serverBlogs.map((blog) => {
+        const localPost = publishedPosts.find((post) => post.title === blog.title);
+        const content = blog.content || '';
+        const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+        return {
+            ...localPost,
+            title: blog.title,
+            description: localPost?.description || content.slice(0, 120),
+            category: localPost?.category || 'Development',
+            date: localPost?.date || new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            readTime: localPost?.readTime || `${Math.max(1, Math.ceil(wordCount / 200))} min read`,
+            art: localPost?.art || 'published-art',
+            glyph: localPost?.glyph || '>_',
+        };
+    });
+    const localOnlyPosts = publishedPosts.filter((post) => !serverBlogs.some((blog) => blog.title === post.title));
+    const visiblePosts = [...serverPosts, ...localOnlyPosts, ...posts];
     const filteredPosts = visiblePosts.filter((post) => `${post.title} ${post.description} ${post.category}`.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
