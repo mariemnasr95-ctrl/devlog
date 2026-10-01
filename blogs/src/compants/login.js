@@ -4,24 +4,37 @@ import { Link, useNavigate } from 'react-router-dom';
 import './login.css';
 
 const loginUser = async (data) => {
-  // Send credentials to the backend and keep its JWT for protected requests.
-  const response = await fetch('http://localhost:5000/api/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
+  const urls = [
+    'http://localhost:5000/api/login',
+    'http://localhost:5000/api/auth/login',
+  ];
 
-  const resData = await response.json();
+  let lastError = null;
 
-  if (!response.ok) {
-    throw new Error(resData.message || 'Login failed');
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const resData = await response.json();
+
+      if (response.ok) {
+        if (resData.token) {
+          localStorage.setItem('token', resData.token);
+        }
+        return resData;
+      }
+
+      lastError = new Error(resData.message || 'Login failed');
+    } catch (error) {
+      lastError = error;
+    }
   }
 
-  if (resData.token) {
-    localStorage.setItem('token', resData.token);
-  }
-
-  return resData;
+  throw lastError || new Error('Unable to connect to the server. Please try again.');
 };
 
 function Login() {
@@ -36,8 +49,8 @@ function Login() {
 
     try {
       const res = await loginUser({ username, password });
-      if (res.token) {
-        navigate('/');
+      if (res && (res.token || res.user)) {
+        navigate('/home', { replace: true });
       }
     } catch (err) {
       setError(err.message || 'Unable to connect to the server. Please try again.');

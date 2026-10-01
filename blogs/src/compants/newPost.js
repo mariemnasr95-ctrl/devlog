@@ -16,6 +16,10 @@ async function createBlog(blogData) {
     });
     const result = await response.json();
     if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('token');
+            throw new Error('Session expired. Please log in again.');
+        }
         throw new Error(result.message || 'Unable to publish the post.');
     }
     return result;
@@ -48,6 +52,9 @@ function NewPost() {
             navigate('/');
         } catch (error) {
             setStatus(error.message || 'Unable to publish the post.');
+            if (error.message && error.message.includes('Session expired')) {
+                navigate('/login');
+            }
         }
     }
 
