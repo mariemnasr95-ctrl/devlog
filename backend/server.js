@@ -15,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'SECRET_KEY';
 const memoryUsers = [];
 const memoryBlogs = [];
 
-app.use(express.json());
+app.use(express.json({ limit: '8mb' }));
 app.use(cors());
 
 const isMongoReady = () => !!process.env.MONGO_URI && mongoose.connection.readyState === 1;
@@ -39,6 +39,13 @@ const authenticateToken = (req, res, next) => {
     req.user = decoded;
     next();
   });
+};
+
+const requireAdmin = (req, res, next) => {
+  if (!req.user?.username?.trim().toLowerCase().startsWith('admin')) {
+    return res.status(403).json({ message: 'Only admin users can manage posts.' });
+  }
+  next();
 };
 
 const createToken = (user) => jwt.sign({
@@ -126,9 +133,9 @@ app.post(['/api/login', '/api/auth/login'], async (req, res) => {
 // 2. ROUTES BLOGS (CRUD)
 // ==========================================
 
-app.post(['/api/blogs', '/api/auth/blogs'], authenticateToken, async (req, res) => {
+app.post(['/api/blogs', '/api/auth/blogs'], authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, content, author } = req.body;
+    const { title, content, author, category, description, image } = req.body;
 
     if (!title || !content) {
       return res.status(400).json({ message: 'Le titre et le contenu sont requis.' });
@@ -137,7 +144,7 @@ app.post(['/api/blogs', '/api/auth/blogs'], authenticateToken, async (req, res) 
     const blogAuthor = author || req.user?.username || req.user?.email || 'anonymous';
 
     if (isMongoReady()) {
-      const newBlog = new Blog({ title, content, author: blogAuthor });
+      const newBlog = new Blog({ title, content, author: blogAuthor, category, description, image });
       const savedBlog = await newBlog.save();
       return res.status(201).json(savedBlog);
     }
@@ -147,6 +154,9 @@ app.post(['/api/blogs', '/api/auth/blogs'], authenticateToken, async (req, res) 
       title,
       content,
       author: blogAuthor,
+      category: category || 'Development',
+      description: description || '',
+      image: image || '',
       createdAt: new Date().toISOString()
     };
     memoryBlogs.push(newBlog);
@@ -180,6 +190,47 @@ app.get('/api/blogs/:id', async (req, res) => {
     const blog = memoryBlogs.find((entry) => entry.id === Number(req.params.id));
     if (!blog) return res.status(404).json({ message: 'Article non trouvé.' });
     res.json(blog);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.put('/api/blogs/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { title, content, category, description, image } = req.body;
+    if (!title || !content) {
+      return res.status(400).json({ message: 'The title and content are required.' });
+    }
+
+    if (isMongoReady()) {
+      const blog = await Blog.findByIdAndUpdate(req.params.id, {
+        title, content, category, description, image
+      }, { new: true, runValidators: true });
+      if (!blog) return res.status(404).json({ message: 'Post not found.' });
+      return res.json(blog);
+    }
+
+    const blog = memoryBlogs.find((entry) => entry.id === Number(req.params.id));
+    if (!blog) return res.status(404).json({ message: 'Post not found.' });
+    Object.assign(blog, { title, content, category: category || 'Development', description: description || '', image: image || '' });
+    res.json(blog);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.delete('/api/blogs/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    if (isMongoReady()) {
+      const blog = await Blog.findByIdAndDelete(req.params.id);
+      if (!blog) return res.status(404).json({ message: 'Post not found.' });
+      return res.json({ message: 'Post deleted.' });
+    }
+
+    const blogIndex = memoryBlogs.findIndex((entry) => entry.id === Number(req.params.id));
+    if (blogIndex === -1) return res.status(404).json({ message: 'Post not found.' });
+    memoryBlogs.splice(blogIndex, 1);
+    res.json({ message: 'Post deleted.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

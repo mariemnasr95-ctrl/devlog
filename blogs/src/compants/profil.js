@@ -1,11 +1,14 @@
 import { Bookmark, BriefcaseBusiness, MapPin, Star, Wrench } from 'lucide-react';
 import cImage from '../media/c.jpg';
 import pythonImage from '../media/python.jpg';
+import { getCurrentUsername } from './auth';
 
 function Profil() {
+    const username = getCurrentUsername();
+
     return (
         <main className="profile-page">
-            <h1 className="profile-page-title">Top creator</h1>
+            <h1 className="profile-page-title">{username ? 'Your profile' : 'Profile'}</h1>
             <article className="profile-card">
                 <div className="profile-cover">
                     <img src={pythonImage} alt="Mountain landscape" />
@@ -13,10 +16,10 @@ function Profil() {
                 </div>
                 <div className="profile-card-body">
                     <div className="profile-intro">
-                        <img className="profile-photo" src={cImage} alt="Alex Morgan" />
+                        <img className="profile-photo" src={cImage} alt={username ? `${username} profile` : 'Profile'} />
                         <div>
-                            <h2>Alex Morgan</h2>
-                            <p>Designing practical ideas for better software.</p>
+                            <h2>{username || 'Guest'}</h2>
+                            <p>{username ? `@${username}` : 'Log in to see your account profile.'}</p>
                         </div>
                     </div>
                     <div className="profile-details"><span><BriefcaseBusiness size={12} /> Product designer</span><span><MapPin size={12} /> In the feedback loop.</span></div>

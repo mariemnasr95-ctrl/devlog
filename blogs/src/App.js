@@ -3,16 +3,19 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import About from './compants/about';
 import Article from './compants/article';
 import Categories from './compants/categories';
+import Drafts from './compants/drafts';
 import Home from './compants/home';
 import Login from './compants/login';
 import NewPost from './compants/newPost';
 import Profil from './compants/profil';
 import Signup from './compants/singup';
+import { ThemeProvider } from './compants/theme';
 
 const router = createBrowserRouter([
   { path: '/', element: <Home /> },
   { path: '/home', element: <Home /> },
   { path: '/categories', element: <Categories /> },
+  { path: '/drafts', element: <Drafts /> },
   { path: '/about', element: <About /> },
   { path: '/article/:slug', element: <Article /> },
   { path: '/login', element: <Login /> },
@@ -24,7 +27,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <div className="App"><RouterProvider router={router} /></div>
+    <ThemeProvider><div className="App"><RouterProvider router={router} /></div></ThemeProvider>
   );
 }
 

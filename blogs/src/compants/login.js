@@ -50,6 +50,7 @@ function Login() {
     try {
       const res = await loginUser({ username, password });
       if (res && (res.token || res.user)) {
+        localStorage.setItem('username', res.user?.username || username);
         navigate('/home', { replace: true });
       }
     } catch (err) {

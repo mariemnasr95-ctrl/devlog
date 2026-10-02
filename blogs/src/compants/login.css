@@ -130,6 +130,39 @@
 	background: #657dff;
 }
 
+html[data-theme='light'] .login-page,
+html[data-theme='light'] .signup-page {
+	background: radial-gradient(circle at 50% 0%, rgba(95, 117, 211, 0.12), transparent 38%), #f1f5fa;
+	color: #1b293b;
+}
+
+html[data-theme='light'] .login-page > h1,
+html[data-theme='light'] .login-container h2,
+html[data-theme='light'] .signup-container h2 {
+	color: #1b2a40;
+}
+
+html[data-theme='light'] .login-container,
+html[data-theme='light'] .signup-container {
+	background: rgba(255, 255, 255, 0.96);
+	border-color: #d5deea;
+	box-shadow: 0 22px 60px rgba(35, 52, 76, 0.12);
+}
+
+html[data-theme='light'] .form-field label,
+html[data-theme='light'] .login-container p {
+	color: #52647b;
+}
+
+html[data-theme='light'] .input-with-icon {
+	background: #f8fafc;
+	border-color: #cbd7e5;
+}
+
+html[data-theme='light'] .input-with-icon input {
+	color: #21334a;
+}
+
 @media (max-width: 420px) {
 	.login-container,
 	.signup-container {
